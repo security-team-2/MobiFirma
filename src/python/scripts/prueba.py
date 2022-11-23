@@ -10,4 +10,4 @@ cur.execute('SELECT * from credentials')
 
 ls = cur.fetchall()
 
-print(ls[0][0])
+print(ls)

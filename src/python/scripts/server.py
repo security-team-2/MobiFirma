@@ -31,18 +31,19 @@ class ssl_server():
             print(f"server trying to connec {add}")
 
             data = conn.recv(1024).strip().decode()
+            # <----- * -----> data | empoyeeId | Sign (data + employeeId)signed?
             user, password, msg = data.split("|")
-
-            # Debería existir siempre, dado que los usuarios y pass estarán predefinidos
+            # <----- * ----->
+    
             if os.path.exists(conf.DB):
-                credentials = dict()
-                with open(conf.CREDENTIALS,"rb") as f:
-                    credentials = pickle.load(f)
-                    f.close()
+                con = sqlite3.connect(conf.DB)
+                cur = con.cursor().execute('SELECT * from credentials')
+                # Obtain all the credentials from the database [(employeeId, pki),(employeeId, pki)]
+                credentials = cur.fetchall()
 
-            # Comprobamos que el usuario pertence al servidor
             local_time = time.strftime("[%d/%m/%y %H:%M:%S]", time.localtime())
 
+            # <----- * ----->
             if user in credentials.keys():
                 if credentials.get(user) == password:
                     conn.send(bytes(f"ACK, welcome to Server ('{host_ip}','{server_port}')...!", "utf-8"))
@@ -60,6 +61,8 @@ class ssl_server():
                 self.log(message,True)
                 self.user_err+=1
                 conn.close()
+            # <----- * ----->
+            
             self.write_attack()
             ssl_server.close()
 
