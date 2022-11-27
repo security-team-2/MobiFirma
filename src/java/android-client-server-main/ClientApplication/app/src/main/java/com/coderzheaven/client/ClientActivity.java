@@ -2,9 +2,11 @@ package com.coderzheaven.client;
 
 import android.annotation.SuppressLint;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.TextUtils;
+import android.util.Base64;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -25,9 +27,18 @@ import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.security.InvalidKeyException;
+import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.Signature;
+import java.security.SignatureException;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -123,6 +134,36 @@ public class ClientActivity extends AppCompatActivity implements View.OnClickLis
         //handler.post(() -> msgList.addView(textView(message, color)));
     }
 
+    public String getSign(String message) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException, InvalidKeyException, SignatureException {
+        Path path = null;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            path = Paths.get("com/coderzheaven/client/key.key");
+        }
+        byte[] bytes = new byte[0];
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                bytes = Files.readAllBytes(path);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        /* Generate private key. */
+
+        PKCS8EncodedKeySpec ks = new PKCS8EncodedKeySpec(bytes);
+        KeyFactory kf = KeyFactory.getInstance("RSA");
+        PrivateKey pvt = kf.generatePrivate(ks);
+
+        Signature sg = Signature.getInstance("SHA256withRSA", "sc");
+        sg.initSign(pvt);
+        sg.update(message.getBytes());
+        byte[] sign = sg.sign();
+
+        String signedMessage = Base64.encodeToString(sign, Base64.DEFAULT);
+
+        return signedMessage;
+    }
+
     private void removeAllViews(){
         handler.post(() -> msgList.removeAllViews());
     }
@@ -213,9 +254,22 @@ public class ClientActivity extends AppCompatActivity implements View.OnClickLis
                 //clientThread.sendMessage(pp);
                 if((sabanasMessage!=null | camasMessage!=null | sillasMessage!=null | sillonesMessage!=null | mesasMessage!=null)&t){
                     try{
-                        String data = employeeId + String.valueOf(pedido);
+                        String message = employeeId + String.valueOf(pedido);
+                        try {
+                            String sign = getSign(message);
+                            clientThread.sendMessage(employeeId +" | "+ String.valueOf(pedido)+ " | "+ sign);
+                        } catch (NoSuchAlgorithmException e) {
+                            e.printStackTrace();
+                        } catch (InvalidKeySpecException e) {
+                            e.printStackTrace();
+                        } catch (NoSuchProviderException e) {
+                            e.printStackTrace();
+                        } catch (InvalidKeyException e) {
+                            e.printStackTrace();
+                        } catch (SignatureException e) {
+                            e.printStackTrace();
+                        }
 
-                        clientThread.sendMessage(employeeId +" | "+ String.valueOf(pedido)+ " | Firma");
                     } finally {
                         Toast.makeText(ClientActivity.this, "Query sent correctly", Toast.LENGTH_SHORT).show();
                     }

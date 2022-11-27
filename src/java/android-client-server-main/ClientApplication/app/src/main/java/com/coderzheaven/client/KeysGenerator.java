@@ -1,30 +1,37 @@
 package com.coderzheaven.client;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
+import java.io.IOException;
+import java.security.Key;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 
+
+
+
 public class KeysGenerator {
 
-    public static void main(String[] args) throws NoSuchAlgorithmException {
+   /* public static void main(String[] args) throws NoSuchAlgorithmException, IOException {
         KeyPairGenerator kgen = KeyPairGenerator.getInstance("RSA");
         kgen.initialize(2048);
-        KeyPair keys = kgen.generateKeyPair();
+        KeyPair kp = kgen.generateKeyPair();
 
-        FileWriter fileWP = null;
-        FileWriter fileWPr= null;
-        try{
-            fileWP = new FileWriter("publicK.txt");
-            fileWPr = new FileWriter("privateK.txt");
+        Key pub = kp.getPublic();
+        Key pvt = kp.getPrivate();
 
-            fileWP.write(String.valueOf(keys.getPublic().getEncoded()));
-            fileWPr.write(String.valueOf(keys.getPrivate().getEncoded()));
 
-            fileWP.close();
-            fileWPr.close();
-        }catch( Exception exp){
-            System.out.println("Exception message"+ exp);
-        }
+        String outFile = "key";
+        FileOutputStream out = new FileOutputStream(outFile + ".key");
+        out.write(pvt.getEncoded());
+        out.close();
+
+        out = new FileOutputStream(outFile + ".pub");
+        out.write(pvt.getEncoded());
+        out.close();
     }
+    */
+
 }

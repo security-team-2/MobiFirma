@@ -26,7 +26,7 @@ class ssl_server():
                 conn, add = server.accept()
                 print(f"server trying to connec {add}")
                 while True:
-                    data = conn.recv(1024).strip().decode()
+                    data = conn.recv(4026).strip().decode()
                     print(data)
                     # <----- * -----> data | empoyeeId | Sign 
                     employeeId, query, sign = data.split("|")
@@ -40,7 +40,7 @@ class ssl_server():
                         credentials = cur.fetchall()
                         if len(credentials)!=0:
                             for entry in credentials:
-                                if entry[0][0] == employeeId :
+                                if entry[0] == employeeId :
                                     # <----- * -----> COMPLETAR CON VERIFICACION DE FIRMA
                                     verificacion = 0
                                     # <----- * ----->

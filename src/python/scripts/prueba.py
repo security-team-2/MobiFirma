@@ -18,9 +18,10 @@ con.commit()
 ls = cur.fetchall()
 
 for entrada in ls:
+    print(entrada[1])
     if entrada[0][0] == '1':
         print("del tiron")
 
-print(ls[0][0])
+print(ls[0])
 print(uuid.uuid1())
 con.close()
